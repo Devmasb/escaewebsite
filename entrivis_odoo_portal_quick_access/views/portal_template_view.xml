@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="portal.portal_my_home">
+        <div class="o_portal_my_home">
+            <div class="oe_structure" id="oe_structure_portal_my_home_1"/>
+            <h3>Documents</h3>
+            <div class="o_portal_docs list-group">
+                <div class="o_portal_doc_spinner spinner-border text-o-color-2 align-self-center mt-5"/>
+                <p class="o_portal_no_doc_message d-none">No Documents to display</p>
+            </div>
+        </div>
+    </template>
+
+    <template id="portal_my_home_inherit">
+        <t t-call="portal.portal_layout">
+            <t t-set="my_details" t-value="True"/>
+            <t t-call="portal.portal_my_home"/>
+            <div class="oe_structure" id="oe_structure_portal_my_home_2"/>
+        </t>
+    </template>
+
+    <template id="portal_searchbar_custom" inherit_id="portal.portal_searchbar">
+        <xpath expr="//div[@id='o_portal_navbar_content']/div" position="after">
+            <button t-if="res_company.menu_access" data-bs-target="#myOffcanvas" data-bs-toggle="offcanvas" t-attf-class="btn btn-secondary position-relative ms-1 btn-sm float-end d-none d-lg-block d-xl-block">
+                <i class="fa fa-sliders my-0 m-2"/>
+            </button>
+        </xpath>
+        <xpath expr="//nav/button" position="after">
+            <button t-if="res_company.menu_access" data-bs-target="#myOffcanvas" data-bs-toggle="offcanvas" t-attf-class="btn btn-secondary position-relative ms-1 btn-sm float-end d-lg-none">
+                <i class="fa fa-sliders my-0 m-2"/>
+            </button>
+        </xpath>
+        <xpath expr="//nav" position="after">
+            <t t-call="entrivis_odoo_portal_quick_access.offcanvas_content_template"/>
+        </xpath>
+    </template>
+
+    <template id="portal_layout_custom" inherit_id="portal.portal_layout">
+        <xpath expr="//div[@t-if='prev_record or next_record']" position="attributes">
+            <attribute name="class">col-1 flex-grow-0 text-end</attribute>
+        </xpath>
+        <xpath expr="//div[@t-if='prev_record or next_record']" position="after">
+            <div t-attf-class="#{'col-1' if prev_record or next_record else 'col-2'}">
+                <button t-if="res_company.menu_access" data-bs-target="#myOffcanvas" data-bs-toggle="offcanvas" t-attf-class="btn btn-secondary position-relative ms-1 btn-sm mx-3 float-end">
+                    <i class="fa fa-sliders my-0 m-2"/>
+                </button>
+            </div>
+        </xpath>
+        <xpath expr="//div[@t-if='not no_breadcrumbs and not my_details and not breadcrumbs_searchbar']" position="after">
+            <t t-call="entrivis_odoo_portal_quick_access.offcanvas_content_template"/>
+        </xpath>
+    </template>
+
+    <template id="offcanvas_content_template">
+        <div class="offcanvas offcanvas-end p-3" id="myOffcanvas" style="width: 80%; max-width: 400px;" tabindex="-1">
+            <div class="accordion accordion-flush flex-grow-1 overflow-auto">
+                <t t-call="portal.portal_my_home"/>
+            </div>
+            <div class="offcanvas-body d-flex justify-content-between flex-grow-0 border-top overflow-hidden">
+                <button t-attf-class="btn btn-secondary d-flex py-1 mb-2"
+                   data-bs-dismiss="offcanvas"
+                   title="Close Menu">
+                    Close
+                </button>
+            </div>
+        </div>
+    </template>
+
+</odoo>
