@@ -1,0 +1,112 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+
+
+<!--
+ *********************************************************************************************************************
+
+ *********************************************************************************************************************
+-->
+    <record model="ir.ui.view" id="sales_contract_proveedor.sales_contract_proveedor_list">
+      <field name="name">sales_contract_proveedor.list</field>
+      <field name="model">sales_contract_proveedor</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="cod_clasificador"/>
+          <field name="obj_contract"/>
+          <field name="fecha_inicio"/>
+          <field name="fecha_final"/>
+          <field name="float_valor"/>
+          <field name="contratista"/>
+          <field name="contratante"/>
+          <field name="contacto"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="sales_contract_proveedor_form_view" model="ir.ui.view">
+                <field name="name">sales_contract_proveedor.form</field>
+                <field name="model">sales_contract_proveedor</field>
+                <field name="arch" type="xml">
+                    <form string="Lista de Contratos">
+                        <sheet>
+                            <div class="oe_title">
+                                <label class="oe_edit_only" for="name"/>
+                                <h1><field name="name" /></h1>
+                            </div>
+                            <group>
+                                <group class="o_label_nowrap">
+                                    <field name="cod_clasificador" />
+                                    <field name="obj_contract" />
+                                    <field name="contratante" />
+                                    <field name="float_valor" />
+                                </group>
+                                <group>
+                                    <field name="fecha_inicio"/>
+                                    <field name="fecha_final"/>
+                                    <field name="contacto"/>
+                                    <field name="cotizacion"/>
+                                </group>
+                            </group>
+                        </sheet>
+                    </form>
+                </field>
+    </record>
+
+
+    <!-- actions opening views on models -->
+
+    <record model="ir.actions.act_window" id="sales_contract_proveedor.sales_contract_proveedor_action_window">
+      <field name="name">Lista de contratos como proveedor</field>
+      <field name="res_model">sales_contract_proveedor</field>
+      <field name="view_mode">tree,form,graph,pivot</field>
+    </record>
+
+
+
+<!--
+ *********************************************************************************************************************
+
+ *********************************************************************************************************************
+-->
+        <record id="sales_order_listacontrato_form_inherit" model="ir.ui.view">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_preview_sale_order']" position="after">
+                    <button name="crearlistcontrato" attrs="{'invisible': [('has_active_listacontrato', '=', True)]}" class="oe_stat_button" icon="fa-newspaper-o" type="object" string="Crear Reg. Contrato"/>
+                </xpath>
+
+                <xpath expr="//group[@name='sale_header']" position="after">
+                  <group name="datos lista contratos" >
+                            <field name="obj_contract"/>
+                            <field name="cod_clasificador"/>
+                            <field name="has_active_listacontrato" invisible="1"/>
+                            <field name="contacto"/>
+                  </group>
+                </xpath>
+            </field>
+        </record>
+
+
+<!--
+ *********************************************************************************************************************
+
+ *********************************************************************************************************************
+-->
+    <!-- Top menu item -->
+
+    <menuitem name="Gestión ESCAE" id="sales_contract_proveedor_menu_root" sequence="20" parent="sale.sale_menu_root"/>
+
+    <!-- menu categories -->
+
+    <menuitem name="Lista Contratos" id="sales_contract_proveedor_menu_1" parent="sales_contract_proveedor.sales_contract_proveedor_menu_root" action="sales_contract_proveedor.sales_contract_proveedor_action_window"/>/>
+
+
+
+  </data>
+</odoo>
