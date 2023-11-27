@@ -1,0 +1,29 @@
+<odoo>
+
+        <record id="pdt_module_category_documents_management" model="ir.module.category">
+            <field name="name">PDT</field>
+            <field name="description">Administra PDT.</field>
+            <field name="sequence">1</field>
+        </record>
+
+        <record id="pdt_group_documents_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="implied_ids" eval="[
+                (4, ref('documents.group_documents_manager')),
+                (4, ref('base.group_user'))
+                ]"/>
+            <field name="category_id" ref="base.module_category_productivity_documents"/>
+        </record>
+
+        <record id="pdt_group_documents_manager" model="res.groups">
+            <field name="name">Administrator</field>
+            <field name="implied_ids" eval="[(4, ref('pdt_group_documents_user'))]"/>
+            <field name="category_id" ref="base.module_category_productivity_documents"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+
+        <record id="base.default_user" model="res.users">
+            <field name="groups_id" eval="[(4, ref('proyecto_pdt.pdt_group_documents_manager'))]"/>
+        </record>
+
+</odoo>

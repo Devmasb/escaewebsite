@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_proyecto_pdt_proyecto_pdt,proyecto_pdt,model_proyecto_pdt,,1,1,1,1
+access_task_valoracionlist,task_valoracionlist,model_task_valoracionlist,,1,1,1,1
+access_task_valoracionlist,task_valoracionlist,model_task_valoracionlist,,1,1,1,1
+access_task_modelomadurez,project_modelomadurez,model_modelomadurez,,1,1,1,1
