@@ -3,3 +3,5 @@ access_proyecto_pdt_proyecto_pdt,proyecto_pdt,model_proyecto_pdt,,1,1,1,1
 access_task_valoracionlist,task_valoracionlist,model_task_valoracionlist,,1,1,1,1
 access_task_valoracionlist,task_valoracionlist,model_task_valoracionlist,,1,1,1,1
 access_task_modelomadurez,project_modelomadurez,model_modelomadurez,,1,1,1,1
+access_task_checklistpdt,task_checklistpdt,model_task_checklistpdt,,1,1,1,1
+access_pdtchecklist_item,pdtchecklist_item,model_pdtchecklist_item,,1,1,1,1

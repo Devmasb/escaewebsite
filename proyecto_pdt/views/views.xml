@@ -20,11 +20,7 @@
       <field name="view_mode">tree,form,kanban,pivot,graph</field>
     </record>
 
-      <record id="sign_item_type_action" model="ir.actions.act_window">
-        <field name="name">Signature Item Type</field>
-        <field name="res_model">sign.item.type</field>
-        <field name="view_mode">tree,form</field>
-    </record>
+
 
     <record id="proyecto_pdt_action_form" model="ir.ui.view">
         <field name="name">proyecto_pdt.action.form</field>
@@ -33,12 +29,19 @@
             <form string="Plan de Detallado de Trabajo">
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button string="ANÁLISIS" name="%(proyecto_pdt_act_project_project_2_project_task_all)d" type="action" class="oe_stat_button" icon="fa-tasks" >
+                        <button string="KANBAN" name="%(proyecto_pdt_act_project_project_task_all_kanban)d" type="action" class="oe_stat_button" icon="fa-th-list" >
+
+                        </button>
+                        <button string="CHECKLIST" name="%(miaction_task_checklistpdt_action)d" type="action" class="oe_stat_button" icon="fa-list-ul" >
+
+                        </button>
+                        <button string="ANÁLISIS" name="%(proyecto_pdt_act_project_project_2_project_task_all)d" type="action" class="oe_stat_button" icon="fa-area-chart" >
 
                         </button>
                         <button string="PLANIFICACIÓN" name="%(proyecto_pdt_planificacion)d" type="action" class="oe_stat_button" icon="fa-calendar-check-o" >
 
                         </button>
+
                     </div>
                     <div class="oe_title pe-0">
                         <field name="name"/>
@@ -65,6 +68,9 @@
                                 <tree>
                                     <field name="pdt_orden" widget="handle"/>
                                     <field name="pdt_componente" invisible="1"/>
+                                    <field name="desfase" invisible="1"/>
+                                    <field name="pdt_control_progreso_auxcalc" invisible="1"/>
+                                    <field name="pdt_control_revisado" widget="boolean_toggle"/>
                                     <field name="pdt_numeral"/>
                                     <field name="name" class="mb-3 pl-3"/>
                                     <field name="pdt_control"/>
@@ -74,6 +80,7 @@
                                     <field name="pdt_componente" />
                                     <field name="pdt_numeral"/>
                                     <field name="pdt_control"/>
+                                    <field name="pdt_control_progreso_auxcalc" invisible="1"/>
                                     <field name="name" />
                                     <field name="m_madurez_id" invisible="1"/>
                                     <field name="valoracionlist_id"/>
@@ -90,6 +97,15 @@
                                     </templates>
                                 </kanban>
                                 <form>
+                                  <div class="oe_button_box" name="button_box">
+                                    <field name="project_use_documents" invisible="1"/>
+                                    <field name="partner_id" invisible="1"/>
+                                    <field name="company_id" invisible="1"/>
+                                    <button class="oe_stat_button" name="%(documents_project.action_view_documents_project_task)d" groups="documents.group_documents_user"
+                                        type="action" icon="fa-file-text-o"  context="{'default_partner_id': partner_id}">
+                                        <field string="Documents" name="document_count" widget="statinfo"/>
+                                    </button>
+                                  </div>
                                     <group>
                                         <group>
                                             <field name="name" widget="text"/>
@@ -98,6 +114,7 @@
                                             <field name="pdt_orden" />
                                             <field name="pdt_categoria" />
                                             <field name="m_madurez_id" invisible="1"/>
+                                            <field name="desfase" invisible="1"/>
 
                                         </group>
                                         <group>
@@ -105,10 +122,12 @@
                                             class="o_task_user_field"
                                             options="{'no_open': True, 'no_quick_create': True}"
                                             widget="many2many_avatar_user"
-                                            domain="[('share', '=', False), ('active', '=', True)]"/>
+                                            domain="[('active', '=', True)]"/>
                                             <field name="fecha_diagnostico" />
-                                            <field name="activity_ids" string="Actividades" widget="list_activity" />
-
+                                            <field name="fecha_final"/>
+                                            <field name="activity_ids" string="Actividades" widget="list_activity"/>
+                                            <field name="pdt_control_revisado" widget="boolean_toggle"/>
+                                            <field name="checkchecklist_id"/>
                                         </group>
                                     </group>
                                     <label for="pdt_control" string="Producto"/>
@@ -133,8 +152,10 @@
                                             <group>
                                                 <group>
                                                     <field name="implementa_valoracionlist_id"/>
-                                                                                                        <field name="nivelefectividad" widget="progressbar"/>
+                                                    <field name="nivelefectividad" widget="progressbar"/>
                                                     <field name="niveldeavanceimplementacion" widget="progressbar"/>
+                                                    <field name="pdt_control_progreso" widget="progressbar"/>
+                                                    <field name="pdt_control_progreso_auxcalc" invisible="1"/>
                                                 </group>
                                                 <group>
                                                     <field name="planned_date_begin" widget="daterange" options="{'related_end_date': 'planned_date_end'}" attrs="{'required': [('planned_date_end', '!=', False)]}"/>
@@ -143,8 +164,20 @@
                                                     <field name="planned_date_end" widget="daterange" options="{'related_start_date': 'planned_date_begin'}" attrs="{'required': [('planned_date_begin', '!=', False)]}"/>
                                                 </group>
                                                 <label for="pdt_observaciones_implementa" string="Observaciones"/>
-                                                <field name="pdt_observaciones_implementa" widget="text"/>
+                                                <field name="pdt_observaciones_implementa"/>
                                             </group>
+                                        </page>
+                                        <page string="CHECKLIST ITEMS">
+                                           <field name="checkchecklists">
+                                                <tree>
+                                                    <field name="name"/>
+                                                    <field name="description"/>
+                                                    <button type="object" name="approve_and_next" class="text-success" icon="fa-check"/>
+                                                    <button type="object" name="mark_completed" icon="fa-check-circle" class="text-success"/>
+                                                    <button type="object" name="mark_canceled" icon="fa-times" class="text-danger"/>
+                                                    <field name="state"/>
+                                                </tree>
+                                            </field>
                                         </page>
                                     </notebook>
                                 </form>
@@ -155,6 +188,7 @@
             </form>
         </field>
     </record>
+
 
     <record id="task_valoracionlist_action" model="ir.actions.act_window">
         <field name="name">Lista de Valoración</field>
@@ -200,6 +234,7 @@
                     <group>
                         <group>
                             <field name="name"/>
+                            <field name="m_madurez_id"/>
                             <field name="nivelefectividad"/>
                             <field name="significado" widget="text"/>
                             <field name="description" widget="text"/>
@@ -235,6 +270,7 @@
                             <field name="name"/>
                             <field name="descriptioncorta"/>
                             <field name="description"/>
+
                     </group>
 
                     <label for="valoracionlist_ids" string="Niveles de Madurez"/>
@@ -244,7 +280,7 @@
         </field>
     </record>
 
-    <menuitem name="Diagnóstico Y PDT" id="proyecto_pdt.menu_root"/>
+    <menuitem name="Diagnóstico y PDT" id="proyecto_pdt.menu_root" web_icon="proyecto_pdt,static/description/icon.png"/>
 
     <menuitem
             id="project_config_root"
@@ -259,7 +295,7 @@
             id="menu_task_modeloslist"
             name="Modelos de Madurez"
             action="task_mmodelos_action"
-            sequence="1"/>
+            sequence="3"/>
 
     <menuitem
             parent="project_config_root"
@@ -269,7 +305,7 @@
             sequence="2"/>
 
 
-    <menuitem name="Planes Detallados de Trabajo" id="proyecto_pdt.menu_pdt" parent="proyecto_pdt.menu_root"/>
+    <menuitem name="Planes Detallados de Trabajo" id="proyecto_pdt.menu_pdt" parent="proyecto_pdt.menu_root" sequence="0"/>
 
 
     <!-- actions -->

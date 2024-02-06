@@ -1,6 +1,6 @@
 
 from odoo import models, fields, api,_
-
+from datetime import datetime
 class ModeloMadurez(models.Model):
     _name = 'modelomadurez'
 
@@ -17,7 +17,7 @@ class TaskPdtvaloracionList(models.Model):
 
     name = fields.Char(string='Nombre', required=True)
     m_madurez_id = fields.Many2one('modelomadurez', string='Modelo de Madurez')
-    description = fields.Char(string='Description')
+    description = fields.Char(string='Descripción')
     tasklist_ids = fields.One2many('project.task', 'valoracionlist_id',
                                     string='CheckList Items')
     description = fields.Char(string='Descripción', required=True)
@@ -36,7 +36,7 @@ class Proyecto_PDT(models.Model):
      project_id = fields.Many2one('project.project', string='Proyecto')
      pdt_task_ids = fields.One2many('project.task', 'pdt_id',
                                      string='Tareas del PDT')
-     campo_agrupamiento = fields.Char(string='Efectividad', required=True)
+     campo_agrupamiento = fields.Char(string='Efectividad')
      m_madurez_id = fields.Many2one('modelomadurez', string='Modelo de Madurez')
 
 
@@ -58,13 +58,24 @@ class Task_Proyecto_PDT(models.Model):
     pdt_id = fields.Many2one('proyecto_pdt')
     pdt_componente = fields.Char(string='Componente')
     pdt_numeral = fields.Char(string='Numeral')
-    pdt_control = fields.Char(string='Producto')
+    pdt_control = fields.Char(string='Producto o actividad a realizar')
     pdt_control_descripcionnorma = fields.Char(string='Descripción')
     pdt_categoria = fields.Char(string='PDT - Categoría')
     pdt_orden = fields.Integer(string="Control - Secuencia",default=1)
     m_madurez_id = fields.Many2one(string='Modelo de Madurez',related="pdt_id.m_madurez_id", store=True)
     fecha_diagnostico = fields.Datetime('Fecha de diagnóstico', default=fields.Datetime.now())
+    fecha_final = fields.Datetime('Fecha final de implementación')
+    task_proyect_pdt_id = fields.Many2one('project.task', string='Tarea Principal')
+    task_pdt_controls = fields.One2many('project.task', 'task_proyect_pdt_id',
+                                                  string='Controles')
+    pdt_control_revisado = fields.Boolean(
+        string="Control revisado",
+        help="Visualiza si el control ha sido revisado ",
+    )
+    desfase = fields.Integer("Desviación de la actividad", compute="_compute_desfase",store=True, group_operator="avg")
 
+    pdt_control_progreso = fields.Integer("Progreso Esperado",group_operator="avg")
+    pdt_control_progreso_auxcalc = fields.Integer("Progreso Esperado", compute="_compute_avances_act")
 
     #DIAGNOSTICO******************************************************************************
     valoracionlist_id = fields.Many2one('task.valoracionlist', string='Madurez Inicial', domain="[('m_madurez_id','=',m_madurez_id)]")
@@ -82,14 +93,57 @@ class Task_Proyecto_PDT(models.Model):
 
 
 
-    @api.depends("nivelefectividad", "autodiag_calificacion_actiual")
+    @api.depends("nivelefectividad", "autodiag_calificacion_actiual", "planned_date_end", "planned_date_begin")
     def _compute_avances(self):
+        hoy = datetime.now()
         for reg in self:
             if (reg.nivelefectividad - reg.autodiag_calificacion_actiual) > 0:
                 reg.niveldeavanceimplementacion = (reg.nivelefectividad - reg.autodiag_calificacion_actiual)*100/(100-reg.autodiag_calificacion_actiual)
             else:
                 reg.niveldeavanceimplementacion = 100 if reg.nivelefectividad == 100 else 0
                 reg.implementa_valoracionlist_id = reg.valoracionlist_id
+
+            if    reg.planned_date_end and  reg.planned_date_begin:
+                if (hoy <= reg.planned_date_end) and  (hoy >= reg.planned_date_begin):
+                  duration = (reg.planned_date_end - reg.planned_date_begin).total_seconds() / 3600.0
+                  reg.pdt_control_progreso = ((reg.planned_date_end - hoy).total_seconds() / 3600.0) / duration *100
+                elif (hoy > reg.planned_date_end):
+                    reg.pdt_control_progreso_auxcalc = 100
+                else:
+                    reg.pdt_control_progreso_auxcalc = 0
+
+
+    def _compute_avances_act(self):
+        hoy = datetime.now()
+        for reg in self:
+            if reg.planned_date_end and reg.planned_date_begin:
+                if (hoy <= reg.planned_date_end) and (hoy >= reg.planned_date_begin):
+                    duration = (reg.planned_date_end - reg.planned_date_begin).total_seconds() / 3600.0
+                    reg.pdt_control_progreso = ((reg.planned_date_end - hoy).total_seconds() / 3600.0) / duration * 100
+                elif (hoy > reg.planned_date_end):
+                    reg.pdt_control_progreso_auxcalc = 100
+                else:
+                    reg.pdt_control_progreso_auxcalc = 0
+            reg.write({
+                'pdt_control_progreso': reg.pdt_control_progreso_auxcalc,
+            })
+
+    @api.depends("planned_date_end", "planned_date_begin", "date_deadline")
+    def _compute_desfase(self):
+        for reg in self:
+            if reg.planned_date_end and reg.planned_date_begin and reg.fecha_final:
+                hoy = reg.fecha_final
+                if (hoy <= reg.planned_date_end) and (hoy >= reg.planned_date_begin):
+                    duration = (reg.planned_date_end - reg.planned_date_begin).total_seconds() / 3600.0
+                    reg.desfase =(((hoy-reg.planned_date_begin  ).total_seconds() / 3600.0) / duration * 100)
+                elif (hoy > reg.planned_date_end):
+                    reg.desfase = 100
+                else:
+                    reg.desfase = 0
+            else:
+                reg.desfase = 100
+
+
 
 
 class ProjectProject(models.Model):
