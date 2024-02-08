@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <record id="action_view_documents_pdt_tasks" model="ir.actions.act_window">
+        <field name="name">PDT</field>
+        <field name="res_model">proyecto_pdt</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('project_id', '=', active_id)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Upload <span class="fw-normal">a file or </span>drag <span class="fw-normal">it here.</span>
+            </p>
+        </field>
+    </record>
+
+    <record id="view_task_form2_pdts_inherit" model="ir.ui.view">
+        <field name="name">project.project.form.inherit</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" name="%(proyecto_pdt.action_view_documents_pdt_tasks)d"
+                    type="action" icon="fa-file-text-o"   context="{'default_partner_id': partner_id}">
+                    <field string="Planes DT" name="pdt_count" widget="statinfo"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="project_view_kanban_inherit_pdt" model="ir.ui.view">
+        <field name="name">project.kanban.inherit.documents</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_kanban"/>
+        <field name="priority">27</field>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('o_kanban_manage_view')]" position="inside">
+                <div role="menuitem">
+                    <a name="%(proyecto_pdt.action_view_documents_pdt_tasks)d" type="action">PDT</a>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
